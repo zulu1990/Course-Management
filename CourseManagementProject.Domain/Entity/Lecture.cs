@@ -23,5 +23,7 @@ namespace CourseManagementProject.Domain.DomainModels
 
         public ICollection<Student> Attendance { get; set; }
 
+        public int TutorId { get; set; }
+
     }
 }

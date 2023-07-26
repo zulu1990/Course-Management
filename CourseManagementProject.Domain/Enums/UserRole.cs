@@ -4,10 +4,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace CourseManagementProject.Domain.DomainModels
+namespace CourseManagementProject.Domain.Enums
 {
-    public abstract class BaseEntity
+    public enum UserRole
     {
-        public int Id { get; set; }
+        Tutor = 1,
+        Student = 2
     }
 }

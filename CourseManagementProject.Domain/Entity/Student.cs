@@ -9,12 +9,7 @@ namespace CourseManagementProject.Domain.DomainModels
 {
     public class Student : BaseEntity
     {
-
-        public string Name { get; set; }
-        public string Surname { get; set; }
-
         public ICollection<Subject> Subjects { get; set; }
-
 
     }
 }

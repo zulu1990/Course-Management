@@ -6,4 +6,17 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <PackageReference Include="Dapper" Version="2.0.143" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="7.0.0" />
+    <PackageReference Include="Microsoft.IdentityModel.Tokens" Version="6.32.0" />
+    <PackageReference Include="System.Data.SqlClient" Version="4.8.5" />
+    <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="6.32.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\CourseManagementProject.Application\CourseManagementProject.Application.csproj" />
+    <ProjectReference Include="..\CourseManagementProject.Domain\CourseManagementProject.Domain.csproj" />
+  </ItemGroup>
+
 </Project>
