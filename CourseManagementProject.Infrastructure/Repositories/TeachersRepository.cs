@@ -1,4 +1,5 @@
 ﻿using CourseManagementProject.Application.Repositories;
+using CourseManagementProject.Domain;
 using CourseManagementProject.Domain.DomainModels;
 using CourseManagementProject.Domain.Enums;
 using Dapper;
@@ -23,27 +24,45 @@ public class TeachersRepository : ITeachersRepository
     }
 
 
-    public async Task<User> GetTeacherByUsername(string username)
+    public async Task<Result<User>> GetTeacherByUsername(string username)
     {
-        using IDbConnection connection = new SqlConnection(_connectionString);
+        try
+        {
+            using IDbConnection connection = new SqlConnection(_connectionString);
 
-        var par = new DynamicParameters();
-        par.Add("@username", username);
+            var par = new DynamicParameters();
+            par.Add("@username", username);
 
-        var user = await connection.QueryFirstOrDefaultAsync<Tutor>("[dbo].[GetTeacherByUsername]", par, commandType: CommandType.StoredProcedure);
+            var user = await connection.QueryFirstOrDefaultAsync<Tutor>("[dbo].[GetTeacherByUsername]", par, commandType: CommandType.StoredProcedure);
 
-        return user;
+            return Result<User>.Succeed(user);
+        }
+        catch(Exception ex)
+        {
+            return Result<User>.Fail(500, ex.Message);
+        }
+        
     }
 
-    public async Task RegisterTeacher(User user)
+    public async Task<Result> RegisterTeacher(User tutor)
     {
-        using IDbConnection connection = new SqlConnection(_connectionString);
-        var par = new DynamicParameters();
-        par.Add("@username", user.Username);
-        par.Add("@subject", 0);
-        par.Add("@password_hash", user.PasswordHash);
-        par.Add("@password_salt", user.PasswordSalt);
+        try
+        {
+            using IDbConnection connection = new SqlConnection(_connectionString);
+            var par = new DynamicParameters();
+            par.Add("@username", tutor.Username);
+            par.Add("@subject", 0);
+            par.Add("@password_hash", tutor.PasswordHash);
+            par.Add("@password_salt", tutor.PasswordSalt);
 
-        await connection.ExecuteAsync("[dbo].[RegisterTeacher]", par, commandType: CommandType.StoredProcedure);
+            await connection.ExecuteAsync("[dbo].[RegisterTeacher]", par, commandType: CommandType.StoredProcedure);
+            return Result.Succeed();
+
+        }
+        catch (Exception e)
+        {
+            return Result.Fail(500, e.Message);
+        }
+        
     }
 }

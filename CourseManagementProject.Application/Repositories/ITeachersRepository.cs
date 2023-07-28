@@ -1,9 +1,10 @@
-﻿using CourseManagementProject.Domain.DomainModels;
+﻿using CourseManagementProject.Domain;
+using CourseManagementProject.Domain.DomainModels;
 
 namespace CourseManagementProject.Application.Repositories;
 
 public interface ITeachersRepository
 {
-    Task<User> GetTeacherByUsername(string username);
-    Task RegisterTeacher(User user);
+    Task<Result<User>> GetTeacherByUsername(string username);
+    Task<Result> RegisterTeacher(User user);
 }

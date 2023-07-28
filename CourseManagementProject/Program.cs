@@ -1,5 +1,6 @@
 using CourseManagementProject.Application;
 using CourseManagementProject.Infrastructure;
+using CourseManagementProject.Infrastructure.Implementation;
 
 namespace CourseManagementProject
 {
@@ -12,11 +13,14 @@ namespace CourseManagementProject
             // Add services to the container.
             builder.Services
                 .AddApplication()
-                .AddInfrastructure()
+                .AddInfrastructure(builder.Configuration)
                 .AddControllers();
             
 
             var app = builder.Build();
+
+            app.UseMiddleware<ExceptionMiddleware>();
+
 
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
@@ -28,7 +32,7 @@ namespace CourseManagementProject
             app.UseHttpsRedirection();
 
             app.UseAuthorization();
-
+            app.UseAuthentication();
 
             app.MapControllers();
 

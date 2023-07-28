@@ -7,9 +7,9 @@ using System.Threading.Tasks;
 
 namespace CourseManagementProject.Domain.DomainModels
 {
-    public class Student : BaseEntity
+    public class Student : User
     {
-        public ICollection<Subject> Subjects { get; set; }
+        public List<Subject> Subjects { get; set; }
 
     }
 }

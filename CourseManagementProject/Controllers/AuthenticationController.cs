@@ -1,5 +1,7 @@
-﻿using CourseManagementProject.Application.Repositories;
+﻿using AutoMapper;
+using CourseManagementProject.Application.Repositories;
 using CourseManagementProject.Application.Services;
+using CourseManagementProject.Domain;
 using CourseManagementProject.Domain.DomainModels;
 using CourseManagementProject.Domain.Enums;
 using CourseManagementProject.Domain.Input;
@@ -19,14 +21,17 @@ public class AuthenticationController : ControllerBase
     private readonly ITokenGenerator _tokenGenerator;
     private readonly IPasswordHandler _passwordHandler;
 
+    public readonly IMapper _mapper;
+
 
     public AuthenticationController(ITeachersRepository teachersRepository, IStudentRepository studentRepository, 
-        ITokenGenerator tokenGenerator, IPasswordHandler passwordHandler)
+        ITokenGenerator tokenGenerator, IPasswordHandler passwordHandler, IMapper mapper)
     {
         _teachersRepository = teachersRepository;
         _studentRepository = studentRepository;
         _tokenGenerator = tokenGenerator;
         _passwordHandler = passwordHandler;
+        _mapper = mapper;
     }
 
 
@@ -51,18 +56,18 @@ public class AuthenticationController : ControllerBase
     [HttpPost("register")]
     public async Task<IActionResult> Register(RegisterModel register)
     {
-        User user = await GetUser(register.Username, register.Role);
+        User user = await GetUser(register.Username, register.UserRole);
 
         if(user != null)
             return BadRequest("User Already Registered");
 
-        _passwordHandler.CreateSaltAndHash(register.Password, out var passwordHash, out var passwordSalt);
-        user.PasswordSalt = passwordSalt;
-        user.PasswordHash = passwordHash;
 
-        switch (register.Role)
+        _passwordHandler.CreateSaltAndHash(register.Password, out var passwordHash, out var passwordSalt);
+
+        switch (register.UserRole)
         {
             case UserRole.Tutor:
+                user = new Tutor { PasswordHash = passwordHash, PasswordSalt = passwordSalt, Subject = register.Subject, Username = register.Username, UserRole = UserRole.Tutor };
                 await _teachersRepository.RegisterTeacher(user);
                 break;
             case UserRole.Student:
@@ -81,15 +86,17 @@ public class AuthenticationController : ControllerBase
 
     private async Task<User> GetUser(string username, UserRole role) 
     {
-        User user = null;
+        Result<User> userResult = null;
 
-        user = (role) switch
+
+
+        userResult = (role) switch
         {
             UserRole.Student => await _studentRepository.GetStudentByUsername(username),
             UserRole.Tutor => await _teachersRepository.GetTeacherByUsername(username),
             _ => null
         };
 
-        return user;
+        return userResult.Data;
     }
 }
