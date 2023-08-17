@@ -6,8 +6,6 @@ using CourseManagementProject.Domain.DomainModels;
 using CourseManagementProject.Domain.Enums;
 using CourseManagementProject.Domain.Input;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Net.Http.Headers;
-using Microsoft.Win32;
 
 namespace CourseManagementProject.Controllers;
 
@@ -22,26 +20,33 @@ public class AuthenticationController : ControllerBase
     private readonly IPasswordHandler _passwordHandler;
 
     public readonly IMapper _mapper;
+    private readonly ILogger _logger;
 
-
-    public AuthenticationController(ITeachersRepository teachersRepository, IStudentRepository studentRepository, 
-        ITokenGenerator tokenGenerator, IPasswordHandler passwordHandler, IMapper mapper)
+    public AuthenticationController(ITeachersRepository teachersRepository, IStudentRepository studentRepository,
+        ITokenGenerator tokenGenerator, IPasswordHandler passwordHandler, IMapper mapper, ILogger<AuthenticationController> logger)
     {
         _teachersRepository = teachersRepository;
         _studentRepository = studentRepository;
         _tokenGenerator = tokenGenerator;
         _passwordHandler = passwordHandler;
         _mapper = mapper;
+        _logger = logger;
     }
 
 
     [HttpPost("login")]
     public async Task<IActionResult> Login(LoginModel login)
     {
+        _logger.LogTrace($"Incoming request to login {login.Username}");
+
         User user = await GetUser(login.Username, login.Role);
 
         if (user == null)
+        {
+            _logger.LogInformation($"User not found, username: {login.Username}, role: {login.Role}");
             return NotFound();
+        }
+            
 
         if(_passwordHandler.VerifyPasswordHash(login.Password, user.PasswordHash, user.PasswordSalt))
             return BadRequest("Incorrect Credentials");
@@ -56,10 +61,16 @@ public class AuthenticationController : ControllerBase
     [HttpPost("register")]
     public async Task<IActionResult> Register(RegisterModel register)
     {
+        _logger.LogTrace($"Incoming request to register user {register.Username}");
+
         User user = await GetUser(register.Username, register.UserRole);
 
         if(user != null)
+        {
+            _logger.LogInformation($"User not Register user, username: {register.Username}, role: {register.UserRole}");
             return BadRequest("User Already Registered");
+        }
+            
 
 
         _passwordHandler.CreateSaltAndHash(register.Password, out var passwordHash, out var passwordSalt);
