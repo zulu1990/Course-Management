@@ -97,17 +97,19 @@ public class AuthenticationController : ControllerBase
 
     private async Task<User> GetUser(string username, UserRole role) 
     {
-        Result<User> userResult = null;
+        User user = null;
 
-
-
-        userResult = (role) switch
+        if(role == UserRole.Student)
         {
-            UserRole.Student => await _studentRepository.GetStudentByUsername(username),
-            UserRole.Tutor => await _teachersRepository.GetTeacherByUsername(username),
-            _ => null
-        };
+            var studentResult = await _studentRepository.GetStudentByUsername(username);
+            user = studentResult.Data;
+        }
+        else
+        {
+            var tutorResult = await _teachersRepository.GetTeacherByUsername(username);
+            user = tutorResult.Data;
+        }
 
-        return userResult.Data;
+        return user;
     }
 }
